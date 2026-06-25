@@ -65,25 +65,25 @@ jobs:
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
-  deploy-to-kubernetes:
-    needs: docker-build-and-scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  # deploy-to-kubernetes:
+  #   needs: docker-build-and-scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
 
-      - name: Configure Kubeconfig
-        uses: azure/k8s-set-context@v3
-        with:
-          kubeconfig: ${{ secrets.KUBECONFIG }}
+  #     - name: Configure Kubeconfig
+  #       uses: azure/k8s-set-context@v3
+  #       with:
+  #         kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Install Helm
-        uses: azure/setup-helm@v3
+  #     - name: Install Helm
+  #       uses: azure/setup-helm@v3
 
-      - name: Deploy Umbrella Chart using Helm
-        run: |
-          helm upgrade --install cloudcart ./helm/cloudcart \
-            --namespace cloudcart \
-            --create-namespace \
-            --set global.domain=cloudcart.ai \
-            --values ./helm/cloudcart/values.yaml
+  #     - name: Deploy Umbrella Chart using Helm
+  #       run: |
+  #         helm upgrade --install cloudcart ./helm/cloudcart \
+  #           --namespace cloudcart \
+  #           --create-namespace \
+  #           --set global.domain=cloudcart.ai \
+  #           --values ./helm/cloudcart/values.yaml
