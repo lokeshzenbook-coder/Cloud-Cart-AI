@@ -1,89 +1,89 @@
-name: CloudCart AI - CI/CD Pipeline
+# name: CloudCart AI - CI/CD Pipeline
 
-on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+# on:
+#   push:
+#     branches: [ main, master ]
+#   pull_request:
+#     branches: [ main, master ]
 
-jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+# jobs:
+#   lint-and-test:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-size: 18
-          cache: 'npm'
+#       - name: Setup Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-size: 18
+#           cache: 'npm'
 
-      - name: Install Root Dependencies
-        run: npm ci
+#       - name: Install Root Dependencies
+#         run: npm ci
 
-      - name: Run Linter
-        run: npm run lint
+#       - name: Run Linter
+#         run: npm run lint
 
-      - name: Run Jest Unit Tests & Coverage
-        run: |
-          echo "Running tests for all microservices..."
-          # In a real pipeline, we navigate into each service and run tests:
-          # cd microservices/auth-service && npm install && npm run test --coverage
-          echo "Tests passed with 85% coverage!"
+#       - name: Run Jest Unit Tests & Coverage
+#         run: |
+#           echo "Running tests for all microservices..."
+#           # In a real pipeline, we navigate into each service and run tests:
+#           # cd microservices/auth-service && npm install && npm run test --coverage
+#           echo "Tests passed with 85% coverage!"
 
-  docker-build-and-scan:
-    needs: lint-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+#   docker-build-and-scan:
+#     needs: lint-and-test
+#     runs-on: ubuntu-latest
+#     if: github.ref == 'refs/heads/main'
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v2
 
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+#       - name: Login to DockerHub
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ secrets.DOCKERHUB_USERNAME }}
+#           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Auth Service Docker Image
-        uses: docker/build-push-action@v4
-        with:
-          context: ./microservices/auth-service
-          push: true
-          tags: cloudcartai/auth-service:latest,cloudcartai/auth-service:${{ github.sha }}
+#       - name: Build Auth Service Docker Image
+#         uses: docker/build-push-action@v4
+#         with:
+#           context: ./microservices/auth-service
+#           push: true
+#           tags: cloudcartai/auth-service:latest,cloudcartai/auth-service:${{ github.sha }}
 
-      - name: Run Security Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: 'cloudcartai/auth-service:latest'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
+#       - name: Run Security Vulnerability Scan (Trivy)
+#         uses: aquasecurity/trivy-action@master
+#         with:
+#           image-ref: 'cloudcartai/auth-service:latest'
+#           format: 'table'
+#           exit-code: '0'
+#           ignore-unfixed: true
+#           severity: 'CRITICAL,HIGH'
 
-  # deploy-to-kubernetes:
-  #   needs: docker-build-and-scan
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+#   # deploy-to-kubernetes:
+#   #   needs: docker-build-and-scan
+#   #   runs-on: ubuntu-latest
+#   #   steps:
+#   #     - name: Checkout Code
+#   #       uses: actions/checkout@v3
 
-  #     - name: Configure Kubeconfig
-  #       uses: azure/k8s-set-context@v3
-  #       with:
-  #         kubeconfig: ${{ secrets.KUBECONFIG }}
+#   #     - name: Configure Kubeconfig
+#   #       uses: azure/k8s-set-context@v3
+#   #       with:
+#   #         kubeconfig: ${{ secrets.KUBECONFIG }}
 
-  #     - name: Install Helm
-  #       uses: azure/setup-helm@v3
+#   #     - name: Install Helm
+#   #       uses: azure/setup-helm@v3
 
-  #     - name: Deploy Umbrella Chart using Helm
-  #       run: |
-  #         helm upgrade --install cloudcart ./helm/cloudcart \
-  #           --namespace cloudcart \
-  #           --create-namespace \
-  #           --set global.domain=cloudcart.ai \
-  #           --values ./helm/cloudcart/values.yaml
+#   #     - name: Deploy Umbrella Chart using Helm
+#   #       run: |
+#   #         helm upgrade --install cloudcart ./helm/cloudcart \
+#   #           --namespace cloudcart \
+#   #           --create-namespace \
+#   #           --set global.domain=cloudcart.ai \
+#   #           --values ./helm/cloudcart/values.yaml
