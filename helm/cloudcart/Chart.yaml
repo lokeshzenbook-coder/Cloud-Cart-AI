@@ -1,0 +1,6 @@
+apiVersion: v2
+name: cloudcart
+description: An enterprise-grade Helm chart for deploying CloudCart AI's 5 microservices and frontend application.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"

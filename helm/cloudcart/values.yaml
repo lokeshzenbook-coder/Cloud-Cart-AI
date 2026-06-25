@@ -1,0 +1,124 @@
+global:
+  domain: cloudcart.ai
+  namespace: cloudcart
+
+frontend:
+  enabled: true
+  replicas: 2
+  image:
+    repository: cloudcartai/frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+authService:
+  enabled: true
+  replicas: 2
+  image:
+    repository: cloudcartai/auth-service
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 5001
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+productService:
+  enabled: true
+  replicas: 2
+  image:
+    repository: cloudcartai/product-service
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 5002
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+cartService:
+  enabled: true
+  replicas: 2
+  image:
+    repository: cloudcartai/cart-service
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 5003
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+orderService:
+  enabled: true
+  replicas: 2
+  image:
+    repository: cloudcartai/order-service
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 5004
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+notificationService:
+  enabled: true
+  replicas: 2
+  image:
+    repository: cloudcartai/notification-service
+    tag: v1.0.0
+    pullPolicy: IfNotPresent
+  service:
+    port: 5005
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+postgresql:
+  host: postgres-db-service
+  port: 5432
+  database: cloudcart
+  username: admin
+
+mongodb:
+  host: mongodb-service
+  port: 27017
+
+redis:
+  host: redis-service
+  port: 6379
+
+rabbitmq:
+  host: rabbitmq-service
+  port: 5672

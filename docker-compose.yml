@@ -1,0 +1,158 @@
+version: "3.8"
+
+services:
+  # DATA STORES
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: cc-postgres
+    environment:
+      POSTGRES_DB: cloudcart
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: securepassword123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cloudcart-net
+
+  mongodb:
+    image: mongo:6.0
+    container_name: cc-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - cloudcart-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: cc-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - cloudcart-net
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cc-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cloudcart-net
+
+  # FRONTEND & GATEWAY SIMULATION
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cc-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - order-service
+      - notification-service
+    networks:
+      - cloudcart-net
+
+  # BACKEND MICROSERVICES
+  auth-service:
+    build:
+      context: ./microservices/auth-service
+      dockerfile: Dockerfile
+    container_name: cc-auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - DATABASE_URL=postgresql://admin:securepassword123@postgres-db:5432/cloudcart
+      - JWT_SECRET=cloudcart_auth_secure_jwt_secret_key_v1
+      - REFRESH_SECRET=cloudcart_auth_secure_refresh_secret_key_v1
+    depends_on:
+      - postgres-db
+    networks:
+      - cloudcart-net
+
+  product-service:
+    build:
+      context: ./microservices/product-service
+      dockerfile: Dockerfile
+    container_name: cc-product-service
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+      - MONGO_URI=mongodb://mongodb:27017/cloudcart
+    depends_on:
+      - mongodb
+    networks:
+      - cloudcart-net
+
+  cart-service:
+    build:
+      context: ./microservices/cart-service
+      dockerfile: Dockerfile
+    container_name: cc-cart-service
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - cloudcart-net
+
+  order-service:
+    build:
+      context: ./microservices/order-service
+      dockerfile: Dockerfile
+    container_name: cc-order-service
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+      - DATABASE_URL=postgresql://admin:securepassword123@postgres-db:5432/cloudcart
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - postgres-db
+      - rabbitmq
+    networks:
+      - cloudcart-net
+
+  notification-service:
+    build:
+      context: ./microservices/notification-service
+      dockerfile: Dockerfile
+    container_name: cc-notification-service
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - cloudcart-net
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  cloudcart-net:
+    driver: bridge

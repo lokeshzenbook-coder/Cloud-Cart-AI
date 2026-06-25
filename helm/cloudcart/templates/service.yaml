@@ -1,0 +1,29 @@
+{{- if .Values.authService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-auth-service-svc
+  namespace: {{ .Values.global.namespace }}
+spec:
+  ports:
+    - port: {{ .Values.authService.service.port }}
+      targetPort: {{ .Values.authService.service.port }}
+      protocol: TCP
+  selector:
+    app: auth-service
+{{- end }}
+---
+{{- if .Values.productService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-product-service-svc
+  namespace: {{ .Values.global.namespace }}
+spec:
+  ports:
+    - port: {{ .Values.productService.service.port }}
+      targetPort: {{ .Values.productService.service.port }}
+      protocol: TCP
+  selector:
+    app: product-service
+{{- end }}

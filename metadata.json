@@ -1,0 +1,6 @@
+{
+  "name": "CloudCart AI",
+  "description": "An AI-powered cloud-native e-commerce platform built with a high-fidelity microservices architecture, featuring smart recommendations, an admin dashboard, and modern responsive design.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
